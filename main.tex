@@ -1,7 +1,9 @@
-\documentclass[a4paper,12pt]{scrartcl}
+\documentclass[a4paper,12pt,twoside]{scrartcl}
 \input{preamble}
 \begin{document}
 \maketitle
+\tableofcontents
+\clearpage
 
 
 %=======================================================================
@@ -9,7 +11,7 @@
 \label{sec:introduction}
 The \abbr{MIA} project is based around monitoring.
 Everything starts with setting up the necessary monitoring and then implementing the required changes to make the monitoring check succeed.
-It's comparibly to test-driven programming where you first write the check and then the function to satisfy the check.
+It's comparable to test-driven programming where you first write the check and then the function to satisfy the check.
 This way the monitoring is never an afterthought and you know from the get-go that the monitoring works.
 
 
@@ -29,7 +31,7 @@ Mail services will include setting up of all necessary \abbr{DNS} records, a Pos
 Setting up a website will include the application server, database, web server, load balancer, certificates, and \abbr{DNS} records.
 
 \paragraph{Single sign-on}
-Authenticating against the different services and especially for accessing your emails should be possible using your Microsoft Active Directoy account.
+Authenticating against the different services and especially for accessing your emails should be possible using your Microsoft Active Directory account.
 
 \paragraph{Remote access \abbr{VPN}}
 This topic might become in-scope if I can find a way to make it work easily.
@@ -65,6 +67,51 @@ Even better would be if they provide an \abbr{API} so \abbr{MIA} can do these ac
 The first two servers have been setup to host the (public) domain name.
 Now we should get \abbr{SSO} to work so you can easily connect to these and future servers and services.
 
+To enable this a new virtual machine or jail will be set up with \abbr{389DS} running on it which will do a one-way sync from the on-premise Active Directory to \abbr{389DS}.
+
+
+%=======================================================================
+\section{Services}
+\label{sec:services}
+
+%-----------------------------------------------------------------------
+\subsection{Email services}
+Setting up an email server requires two new virtual machines running the Postfix \abbr{SMTP} server and two more virtual machines running the Dovecot \abbr{IMAP} server.
+Additionally several \abbr{DNS} records need to be added.
+These include \abbr{MX} and \abbr{SPF} but also \abbr{SSHFP} records for the new virtual machines.
+
+Enabling webmail will create a lot of complexity as Roundcube requires a web server, \abbr{PHP}, and a database.
+Our philosophy of allowing dynamic growth and redundancy will add load balancer to this traffic flow.
+
+%-----------------------------------------------------------------------
+\subsection{Web services}
+The addition of a single static website requires a minimum of four new virtual machines.
+In addition to two new web servers two load balancers will have to be created---unless they already exist in which case their configuration will have to be updated.
+The content of the website will be fetched using a \texttt{git clone} and \texttt{git checkout}.
+
+Dynamic websites require the addition of application and database servers.
+Database servers can be shared between different services.
+It has to be investigated whether or not the application servers can be used for several different websites but this is most likely the case as well.
+
+%-----------------------------------------------------------------------
+\subsection{Databases}
+The database server is an ``internal'' server.
+It will only host databases required by the services offered by \abbr{MIA}.
+It will thus only host databases automatically created by software such as Roundcube or WordPress.
+There is no need for a user to manually access the database server.
+
+%-----------------------------------------------------------------------
+\subsection{Load balancing}
+The two load balancers form an active/standby cluster and direct the incoming sessions to the different web servers.
+
+%-----------------------------------------------------------------------
+\subsection{Application servers}
+Application servers for the websites can be either \abbr{PHP} or Python application servers.
+
+
+%=======================================================================
+\section{Monitoring}
+\label{sec:monitoring}
 
 
 
