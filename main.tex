@@ -4,20 +4,22 @@
 \maketitle
 
 
-
+%=======================================================================
 \section{Introduction}
+\label{sec:introduction}
 The \abbr{MIA} project is based around monitoring.
 Everything starts with setting up the necessary monitoring and then implementing the required changes to make the monitoring check succeed.
 It's comparibly to test-driven programming where you first write the check and then the function to satisfy the check.
 This way the monitoring is never an afterthought and you know from the get-go that the monitoring works.
 
 
-
+%=======================================================================
 \section{Scope of the project}
+\label{sec:scope}
 The main focus of the project will be web and mail hosting, including \abbr{DNS}.
 We will assume a greenfield deployment in each of these three scenarios though this will be challenging for the setup of \abbr{DNS}.
 
-
+%-----------------------------------------------------------------------
 \subsection{In scope}
 
 \paragraph{Mail services}
@@ -33,78 +35,38 @@ Authenticating against the different services and especially for accessing your 
 This topic might become in-scope if I can find a way to make it work easily.
 The problem will be configuring the local firewall to allow for inbound traffic.
 
+\paragraph{Virtualization}
+There will be a choice between spinning up new virtual machines, creating containers, or jails (FreeBSD).
+In case a new virtual machine (cloud \abbr{VPS}) is created for each server, costs may increase significantly but the general performance might be better.
+Linux containers and FreeBSD jails will require an initial set of cloud \abbr{VPS} instances to run the containers or jails on.
 
+%-----------------------------------------------------------------------
 \subsection{Out of scope}
 The local network will out of scope, i.e., this project does not aim to monitor and configure local switches or firewalls.
 
 
+%=======================================================================
+\section{Initialization}
+\label{sec:initialization}
+During the initial setup the decision will have to be made for virtual machines or jails.
+Either way at least two new virtual machines will have to be created with Digital Ocean or AWS.
+Perhaps a manual option should be provided so that you can enter the \abbr{IP} addresses or domain names and the root credentials of two VMware vSphere virtual machines hosted locally.
+
+Next you need to enter your domain name.
+If you want to import the existing (public) zone configuration, you will either have to upload the zone file or allow the \abbr{MIA} box to do an \abbr{AXFR} zone transfer from the existing \abbr{DNS} servers.
+Either way, manual actions will be needed to setup your two new name servers as the authoritative name servers for the domain.
+Example configurations should be provided for a few major hosting companies, e.g., GoDaddy.
+Even better would be if they provide an \abbr{API} so \abbr{MIA} can do these actions automatically.
+
+
+%=======================================================================
+\section{Single sign on}
+\label{sec:sso}
+The first two servers have been setup to host the (public) domain name.
+Now we should get \abbr{SSO} to work so you can easily connect to these and future servers and services.
 
 
 
 
-
-
-
-\section{Introduction}
-The goal of the \abbr{MIA} project is to setup a complete network infrastructure based on monitoring.
-Let's take a website as example.
-The website begins with the \abbr{DNS} name so we build this into the monitoring environment: an \abbr{A} record check for the website we want to build.
-Apart from the \abbr{A} record the monitoring environment will also check for \abbr{NS} records and monitor those name servers.
-
-If a check fails we try to automatically rectify the problem.
-In case of a missing \abbr{A} record, we will create the record with Ansible.
-In case the name servers are down, we will spin up new servers on Digital Ocean or AWS with Terraform, install the needed software, modify \abbr{NS} and \abbr{A} records to point to these new servers and pusht he \abbr{DNS} configuration using Ansible.
-
-Next we will poll the \abbr{DNS} name for ports \abbr{TCP}/80 and \abbr{TCP}/443.
-The same rules apply here.
-If they are down, spin up servers with Terraform, install the software, push the configuration files and get the web server running.
-Better yet, get HAProxy running and spin up web servers as the backend behind HAProxy.
-Monitor the load of your web servers and if the load becomes too high, spin up additional servers.
-
-
-
-\section{Options}
-Instead of spinning up new virtual machines in the cloud using Terraform, there should be an option to spin up container/jail instances on a given set of virtualization hosts.
-This will obviously reduce the costs on the number of virtual machines, but will increase complexity as those virtualization hosts will need additional monitoring to determine whether extra containers/jails are permitted to be installed.
-
-
-
-\section{Configuration files}
-The end user will have to define configuration templates which can be pushed using Ansible.
-This means that the user will have to provide at least a few options from which a Apache configuration file will be generated.
-The same goes for \abbr{DNS}, HAproxy et cetera.
-Though it is not likely the end user will have to modify anything to the default two-node name server setup and most load balancer configurations do not need any tweaking either.
-
-
-
-\section{Monitoring}
-The heart and soul of \abbr{MIA} is of course the monitoring dashboard from which you can see the health of the environment.
-Not only does it have to provide a generic overview of the customer service (e.g., the website) but it will also have to account for dependancies.
-
-
-
-
-
-
-
-
-\section{Workflow for a website}
-When you want to add a new website, you start with entering the \abbr{FQDN}, e.g., www.marcoen.net.
-This will immediately setup several checks:
-\begin{itemize}
-\item
-    Perform a \abbr{DNS} lookup for the given \abbr{FQDN}.
-\item
-    Ping the \abbr{IP} address returned by the \abbr{DNS} lookup.
-\item
-    Check whether both \abbr{TCP}/80 and \abbr{TCP}/443 are opened on the given \abbr{IP} address.
-\item
-    Check whether the returned web page matches the expected web page.
-\end{itemize}
-At first all these checks will fail.
-Some failed checks will trigger an action, e.g., when the \abbr{DNS} lookup fails, try to add the \abbr{DNS} record.
-This can quickly lead you down a rabit hole though.
-You will need to ask the user for credentials to authenticate to the master name server, or set it up if it does not yet exist.
-You will need to ask the user for the \abbr{IP} address---something the user should not need to know.
 
 \end{document}
