@@ -6,6 +6,46 @@
 
 
 \section{Introduction}
+The \abbr{MIA} project is based around monitoring.
+Everything starts with setting up the necessary monitoring and then implementing the required changes to make the monitoring check succeed.
+It's comparibly to test-driven programming where you first write the check and then the function to satisfy the check.
+This way the monitoring is never an afterthought and you know from the get-go that the monitoring works.
+
+
+
+\section{Scope of the project}
+The main focus of the project will be web and mail hosting, including \abbr{DNS}.
+We will assume a greenfield deployment in each of these three scenarios though this will be challenging for the setup of \abbr{DNS}.
+
+
+\subsection{In scope}
+
+\paragraph{Mail services}
+Mail services will include setting up of all necessary \abbr{DNS} records, a Postfix email server for a single domain, an \abbr{IMAP} server for mail retrieval and possibly a webmail client though this will require setting up a website, load balancer\ldots
+
+\paragraph{Web services}
+Setting up a website will include the application server, database, web server, load balancer, certificates, and \abbr{DNS} records.
+
+\paragraph{Single sign-on}
+Authenticating against the different services and especially for accessing your emails should be possible using your Microsoft Active Directoy account.
+
+\paragraph{Remote access \abbr{VPN}}
+This topic might become in-scope if I can find a way to make it work easily.
+The problem will be configuring the local firewall to allow for inbound traffic.
+
+
+\subsection{Out of scope}
+The local network will out of scope, i.e., this project does not aim to monitor and configure local switches or firewalls.
+
+
+
+
+
+
+
+
+
+\section{Introduction}
 The goal of the \abbr{MIA} project is to setup a complete network infrastructure based on monitoring.
 Let's take a website as example.
 The website begins with the \abbr{DNS} name so we build this into the monitoring environment: an \abbr{A} record check for the website we want to build.
@@ -43,26 +83,8 @@ Not only does it have to provide a generic overview of the customer service (e.g
 
 
 
-\section{Services which are in scope}
-\begin{description}
-\item[Website]
-    Set up \abbr{DNS}, Let's Encrypt, load balancer, web server, application server (\abbr{PHP} or Python)\ldots
-\item[Email]
-    Set up \abbr{DNS} records, webmail client, mail server, possibly also an IMAP server\ldots
-\item[\abbr{DNS}]
-    Implement \abbr{DNSSEc}
-\item[\abbr{VPN}]
-    Remote access \abbr{VPN} based on Wireguard or something similar.
-\item[Single sign-on]
-    Provide \abbr{SSO} with Microsoft \abbr{AD} integration.
-\end{description}
 
 
-
-
-\section{Services which are out of scope}
-Currently there are no plans to include monitoring and configuration of the local network.
-This is in part because there are too many switches and firewall in use by small businesses of which many have no \abbr{CLI} to manage them or provide any metrics (e.g.,\ \abbr{SNMP}).
 
 
 
