@@ -1,0 +1,88 @@
+\documentclass[a4paper,12pt]{scrartcl}
+\input{preamble}
+\begin{document}
+\maketitle
+
+
+
+\section{Introduction}
+The goal of the \abbr{MIA} project is to setup a complete network infrastructure based on monitoring.
+Let's take a website as example.
+The website begins with the \abbr{DNS} name so we build this into the monitoring environment: an \abbr{A} record check for the website we want to build.
+Apart from the \abbr{A} record the monitoring environment will also check for \abbr{NS} records and monitor those name servers.
+
+If a check fails we try to automatically rectify the problem.
+In case of a missing \abbr{A} record, we will create the record with Ansible.
+In case the name servers are down, we will spin up new servers on Digital Ocean or AWS with Terraform, install the needed software, modify \abbr{NS} and \abbr{A} records to point to these new servers and pusht he \abbr{DNS} configuration using Ansible.
+
+Next we will poll the \abbr{DNS} name for ports \abbr{TCP}/80 and \abbr{TCP}/443.
+The same rules apply here.
+If they are down, spin up servers with Terraform, install the software, push the configuration files and get the web server running.
+Better yet, get HAProxy running and spin up web servers as the backend behind HAProxy.
+Monitor the load of your web servers and if the load becomes too high, spin up additional servers.
+
+
+
+\section{Options}
+Instead of spinning up new virtual machines in the cloud using Terraform, there should be an option to spin up container/jail instances on a given set of virtualization hosts.
+This will obviously reduce the costs on the number of virtual machines, but will increase complexity as those virtualization hosts will need additional monitoring to determine whether extra containers/jails are permitted to be installed.
+
+
+
+\section{Configuration files}
+The end user will have to define configuration templates which can be pushed using Ansible.
+This means that the user will have to provide at least a few options from which a Apache configuration file will be generated.
+The same goes for \abbr{DNS}, HAproxy et cetera.
+Though it is not likely the end user will have to modify anything to the default two-node name server setup and most load balancer configurations do not need any tweaking either.
+
+
+
+\section{Monitoring}
+The heart and soul of \abbr{MIA} is of course the monitoring dashboard from which you can see the health of the environment.
+Not only does it have to provide a generic overview of the customer service (e.g., the website) but it will also have to account for dependancies.
+
+
+
+\section{Services which are in scope}
+\begin{description}
+\item[Website]
+    Set up \abbr{DNS}, Let's Encrypt, load balancer, web server, application server (\abbr{PHP} or Python)\ldots
+\item[Email]
+    Set up \abbr{DNS} records, webmail client, mail server, possibly also an IMAP server\ldots
+\item[\abbr{DNS}]
+    Implement \abbr{DNSSEc}
+\item[\abbr{VPN}]
+    Remote access \abbr{VPN} based on Wireguard or something similar.
+\item[Single sign-on]
+    Provide \abbr{SSO} with Microsoft \abbr{AD} integration.
+\end{description}
+
+
+
+
+\section{Services which are out of scope}
+Currently there are no plans to include monitoring and configuration of the local network.
+This is in part because there are too many switches and firewall in use by small businesses of which many have no \abbr{CLI} to manage them or provide any metrics (e.g.,\ \abbr{SNMP}).
+
+
+
+\section{Workflow for a website}
+When you want to add a new website, you start with entering the \abbr{FQDN}, e.g., www.marcoen.net.
+This will immediately setup several checks:
+\begin{itemize}
+\item
+    Perform a \abbr{DNS} lookup for the given \abbr{FQDN}.
+\item
+    Ping the \abbr{IP} address returned by the \abbr{DNS} lookup.
+\item
+    Check whether both \abbr{TCP}/80 and \abbr{TCP}/443 are opened on the given \abbr{IP} address.
+\item
+    Check whether the returned web page matches the expected web page.
+\end{itemize}
+At first all these checks will fail.
+Some failed checks will trigger an action, e.g., when the \abbr{DNS} lookup fails, try to add the \abbr{DNS} record.
+This can quickly lead you down a rabit hole though.
+You will need to ask the user for credentials to authenticate to the master name server, or set it up if it does not yet exist.
+You will need to ask the user for the \abbr{IP} address---something the user should not need to know.
+
+\end{document}

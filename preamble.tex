@@ -1,0 +1,14 @@
+\usepackage[margin=3cm,right=6cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[pdfencoding=auto]{hyperref}
+\usepackage{bookmark} % faster updated bookmarks
+
+\newcommand*{\abbr}[1]{%
+   % Format abbreviations as small capitals
+   \texorpdfstring{\textsc{\MakeLowercase{#1}}}{#1}%
+}
+
+\title{Managed Infrastructure with Automation}
+\author{Tom Marcoen}
